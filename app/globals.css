@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fix slide transition overlap */
+.swiper-slide {
+  opacity: 0 !important;
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+.swiper-slide-active {
+  opacity: 1 !important;
+}
+
+/* Ensure fade effect works properly */
+.swiper-fade .swiper-slide {
+  pointer-events: none;
+  transition-property: opacity;
+}
+
+.swiper-fade .swiper-slide-active {
+  pointer-events: auto;
+}
