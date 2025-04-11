@@ -14,10 +14,7 @@ const UploadProjectForm = () => {
     message: "",
     success: null,
   });
-localStorage.setItem(
-  "token",
-  "1|5nCpv3TGAh1RUkHl6Qv6rXqohAbOgOkgQ6OMsgqR1429c320"
-);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -34,16 +31,6 @@ localStorage.setItem(
     e.preventDefault();
     setStatus({ loading: true, message: "", success: null });
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setStatus({
-        loading: false,
-        message: "Authentication token missing.",
-        success: false,
-      });
-      return;
-    }
-
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
@@ -51,11 +38,8 @@ localStorage.setItem(
     if (formData.document) data.append("document", formData.document);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/project", {
+      const response = await fetch("http://127.0.0.1:8000/api/project-update", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: data,
       });
 

@@ -3,7 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import { Raleway } from "next/font/google";
-
+import { UserProvider } from "./context/UserContext";
+import { Toaster } from "react-hot-toast";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -32,10 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" className={`${geistSans.variable} ${geistMono.variable} ${raleway.variable} antialiased`}>
+    <html
+      lang="ar"
+      className={`${geistSans.variable} ${geistMono.variable} ${raleway.variable} antialiased`}
+    >
       <body className="font-raleway-black">
-        <Navbar/>
-        {children}
+        <UserProvider>
+          <Toaster position="top-center" reverseOrder={false} />
+          <Navbar />
+          {children}
+        </UserProvider>
       </body>
     </html>
   );
