@@ -3,20 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "../context/UserContext";
-import toast from "react-hot-toast"; // ✅ import toast
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useUser();
+  const { login } = useUser(); // ✅ نستدعي login التي تقبل token
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      toast.error("يرجى إدخال البريد الإلكتروني وكلمة المرور");
       return;
     }
 
@@ -33,63 +33,68 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
-      console.log(data.data.token);
+
       if (response.ok && data.data.token) {
-        // ✅ Save token & user
-        
-        localStorage.setItem("token", data.data.token);
+        const token = data.data.token;
+
+        // ✅ حفظ البيانات في التخزين المحلي
+        localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
 
-        login(); // update context
-        toast.success("Login successful!");
+        // ✅ استدعاء login مع التوكن
+        login(token);
 
-        // Redirect after short delay to let toast show
+        toast.success("تم تسجيل الدخول بنجاح!");
+
         setTimeout(() => {
           router.push("/");
         }, 1000);
       } else {
-        toast.error(data.message || "Login failed. Please try again.");
+        toast.error(data.message || "فشل تسجيل الدخول. حاول مرة أخرى.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("An error occurred. Please try again.");
+      toast.error("حدث خطأ ما. حاول مرة أخرى.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A2647] px-4">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#0A2647] px-4"
+      dir="rtl"
+    >
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md text-right">
         <h2 className="text-2xl font-bold mb-6 text-center text-[#0A2647]">
-          Login to Your Account
+          تسجيل الدخول إلى حسابك
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              البريد الإلكتروني
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              كلمة المرور
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
               required
             />
           </div>
@@ -101,14 +106,14 @@ const LoginPage = () => {
               loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-900"
             }`}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
           </button>
         </form>
 
         <p className="text-sm text-center mt-4">
-          Don’t have an account?{" "}
+          ليس لديك حساب؟{" "}
           <a href="/signup" className="text-blue-600 hover:underline">
-            Sign up
+            أنشئ حساب الآن
           </a>
         </p>
       </div>

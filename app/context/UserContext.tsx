@@ -1,39 +1,32 @@
 "use client";
-
 import { createContext, useContext, useEffect, useState } from "react";
 
-type UserContextType = {
-  isLoggedIn: boolean;
-  login: () => void;
-  logout: () => void;
-};
+const UserContext = createContext<any>(null);
 
-const UserContext = createContext<UserContextType>({
-  isLoggedIn: false,
-  login: () => {},
-  logout: () => {},
-});
-
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+export const UserProvider = ({ children }: any) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
     }
+    setIsLoading(false);
   }, []);
 
-  const login = () => setIsLoggedIn(true);
+  const login = (token: string) => {
+    localStorage.setItem("token", token); // ✅ خزّن التوكن
+    setIsLoggedIn(true);
+  };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("token"); // ✅ احذف التوكن
     setIsLoggedIn(false);
   };
 
   return (
-    <UserContext.Provider value={{ isLoggedIn, login, logout }}>
+    <UserContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
       {children}
     </UserContext.Provider>
   );

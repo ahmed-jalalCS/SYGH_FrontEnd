@@ -2,7 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["harber.org"], // ✅ Add your image domain here
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "vonrueden.com",
+        pathname: "**",
+      },
+    ],
   },
 };
 

@@ -1,67 +1,76 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     product: [
-      { name: 'Features', href: '/features' },
-      { name: 'Categories', href: '/categories' },
-      { name: 'Universities', href: '/universities' },
-      { name: 'Projects', href: '/projects' },
-      { name: 'Research Papers', href: '/papers' },
+      { name: "الميزات", href: "/features" },
+      { name: "الفئات", href: "/categories" },
+      { name: "الجامعات", href: "/universities" },
+      { name: "المشاريع", href: "/projects" },
+      { name: "أوراق بحثية", href: "/papers" },
     ],
     company: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'News', href: '/news' },
-      { name: 'Press Kit', href: '/press' },
-      { name: 'Contact', href: '/contact' },
+      { name: "من نحن", href: "/about" },
+      { name: "الوظائف", href: "/careers" },
+      { name: "الأخبار", href: "/news" },
+      { name: "حقيبة الإعلام", href: "/press" },
+      { name: "اتصل بنا", href: "/contact" },
     ],
     resources: [
-      { name: 'Blog', href: '/blog' },
-      { name: 'Help Center', href: '/help' },
-      { name: 'Guidelines', href: '/guidelines' },
-      { name: 'FAQs', href: '/faqs' },
-      { name: 'Documentation', href: '/docs' },
+      { name: "المدونة", href: "/blog" },
+      { name: "مركز المساعدة", href: "/help" },
+      { name: "الإرشادات", href: "/guidelines" },
+      { name: "الأسئلة الشائعة", href: "/faqs" },
+      { name: "التوثيق", href: "/docs" },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
-      { name: 'Disclaimer', href: '/disclaimer' },
+      { name: "سياسة الخصوصية", href: "/privacy" },
+      { name: "شروط الاستخدام", href: "/terms" },
+      { name: "سياسة الكوكيز", href: "/cookies" },
+      { name: "إخلاء المسؤولية", href: "/disclaimer" },
     ],
   };
 
   const socialLinks = [
-    { name: 'Twitter', href: 'https://twitter.com', icon: '/icons/twitter.svg' },
-    { name: 'LinkedIn', href: 'https://linkedin.com', icon: '/icons/linkedin.svg' },
-    { name: 'GitHub', href: 'https://github.com', icon: '/icons/github.svg' },
-    { name: 'Instagram', href: 'https://instagram.com', icon: '/icons/instagram.svg' },
+    { name: "تويتر", href: "https://twitter.com", icon: "/icons/twitter.svg" },
+    {
+      name: "لينكدإن",
+      href: "https://linkedin.com",
+      icon: "/icons/linkedin.svg",
+    },
+    { name: "جيت هب", href: "https://github.com", icon: "/icons/github.svg" },
+    {
+      name: "إنستغرام",
+      href: "https://instagram.com",
+      icon: "/icons/instagram.svg",
+    },
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-gray-900 text-gray-300" dir="rtl">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
           {/* Logo and Description */}
-          <div className="col-span-2 md:col-span-3 lg:col-span-2">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2 text-right">
             <Link href="/" className="inline-block">
               <Image
                 src="/logo-white.svg"
-                alt="SYGH Logo"
+                alt="شعار SYGH"
                 width={120}
                 height={40}
                 className="h-10 w-auto"
               />
             </Link>
             <p className="mt-4 text-gray-400 max-w-md">
-              Connecting students with universities worldwide through innovative project sharing and collaboration.
+              نربط الطلاب بالجامعات حول العالم من خلال مشاركة المشاريع المبتكرة
+              والتعاون الأكاديمي.
             </p>
             {/* Social Links */}
-            <div className="flex space-x-4 mt-6">
+            <div className="flex space-x-reverse space-x-4 mt-6 justify-end">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -83,8 +92,8 @@ const Footer = () => {
           </div>
 
           {/* Links Sections */}
-          <div className="col-span-1">
-            <h3 className="text-white font-semibold mb-4">Product</h3>
+          <div className="col-span-1 text-right">
+            <h3 className="text-white font-semibold mb-4">المنتج</h3>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.name}>
@@ -99,8 +108,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="col-span-1">
-            <h3 className="text-white font-semibold mb-4">Company</h3>
+          <div className="col-span-1 text-right">
+            <h3 className="text-white font-semibold mb-4">الشركة</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
@@ -115,8 +124,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="col-span-1">
-            <h3 className="text-white font-semibold mb-4">Resources</h3>
+          <div className="col-span-1 text-right">
+            <h3 className="text-white font-semibold mb-4">المصادر</h3>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
@@ -133,30 +142,32 @@ const Footer = () => {
         </div>
 
         {/* Newsletter Subscription */}
-        <div className="border-t border-gray-800 pt-8 mt-12">
-          <div className="max-w-md">
-            <h3 className="text-white font-semibold mb-4">Subscribe to our newsletter</h3>
-            <form className="flex gap-2">
+        <div className="border-t border-gray-800 pt-8 mt-12 text-right">
+          <div className="max-w-md ml-auto">
+            <h3 className="text-white font-semibold mb-4">
+              اشترك في النشرة البريدية
+            </h3>
+            <form className="flex gap-2 flex-row-reverse">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="أدخل بريدك الإلكتروني"
                 className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
               <button
                 type="submit"
                 className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Subscribe
+                اشترك
               </button>
             </form>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-800 mt-12 pt-8 text-right">
+          <div className="flex flex-col md:flex-row-reverse justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} SYGH. All rights reserved.
+              © {currentYear} SYGH. جميع الحقوق محفوظة.
             </div>
             <div className="flex flex-wrap justify-center gap-6">
               {footerLinks.legal.map((link) => (
@@ -176,4 +187,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;
