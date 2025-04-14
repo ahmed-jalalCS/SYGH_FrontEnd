@@ -5,10 +5,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "vonrueden.com",
-        pathname: "**",
+        hostname: "via.placeholder.com",
+      },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
       },
     ],
+    domains: ["127.0.0.1", "plus.unsplash.com"],
   },
 };
 

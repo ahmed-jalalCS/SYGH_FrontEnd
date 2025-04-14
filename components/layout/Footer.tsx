@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const Footer = () => {
+const Footer = ({ id }: { id?: string }) => {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = {
@@ -50,7 +50,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300" dir="rtl">
+    <footer id={id} className="bg-gray-900 text-gray-300" dir="rtl">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">

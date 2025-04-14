@@ -10,6 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.5",
+    "@fontsource/tajawal": "^5.2.5",
     "@google/generative-ai": "^0.24.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "axios": "^1.7.9",
@@ -22,7 +24,7 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
-    "swiper": "^11.1.15"
+    "swiper": "^11.2.6"
   },
   "devDependencies": {
     "@types/node": "^20",

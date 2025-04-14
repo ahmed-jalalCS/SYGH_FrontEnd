@@ -9,8 +9,8 @@ export default function Home() {
       <Hero />
       <About />
       <Categories />
-      <Universities />
-      <Footer />
+      <Universities id="about" />
+      <Footer id="contact" />
       {/* Other content */}
     </main>
   );

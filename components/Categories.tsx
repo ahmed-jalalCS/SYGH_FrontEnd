@@ -1,272 +1,142 @@
-// "use client";
-
-// import { useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-
-// const Categories = () => {
-//   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-//   const categories = [
-//     {
-//       title: "Computer Science",
-//       icon: "/images/categories/cs.svg",
-//       description: "Explore projects in AI, Web Development, Mobile Apps, and more",
-//       count: 234,
-//       color: "from-blue-500 to-blue-600",
-//       link: "/categories/computer-science"
-//     },
-//     {
-//       title: "Engineering",
-//       icon: "/images/categories/engineering.svg",
-//       description: "Discover mechanical, electrical, and civil engineering projects",
-//       count: 189,
-//       color: "from-green-500 to-green-600",
-//       link: "/categories/engineering"
-//     },
-//     {
-//       title: "Business",
-//       icon: "/images/categories/business.svg",
-//       description: "Browse startups, business plans, and market research",
-//       count: 156,
-//       color: "from-purple-500 to-purple-600",
-//       link: "/categories/business"
-//     },
-//     {
-//       title: "Design",
-//       icon: "/images/categories/design.svg",
-//       description: "View UX/UI, graphic design, and architectural projects",
-//       count: 142,
-//       color: "from-pink-500 to-pink-600",
-//       link: "/categories/design"
-//     },
-//     {
-//       title: "Science",
-//       icon: "/images/categories/science.svg",
-//       description: "Explore research in physics, chemistry, and biology",
-//       count: 167,
-//       color: "from-yellow-500 to-yellow-600",
-//       link: "/categories/science"
-//     },
-//     {
-//       title: "Arts & Humanities",
-//       icon: "/images/categories/arts.svg",
-//       description: "Discover projects in literature, history, and visual arts",
-//       count: 128,
-//       color: "from-red-500 to-red-600",
-//       link: "/categories/arts-humanities"
-//     }
-//   ];
-
-//   return (
-//     <section className="py-20 bg-gray-50">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         {/* Header */}
-//         <div className="text-center mb-16">
-//           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-//             Explore Categories
-//           </h2>
-//           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-//             Discover projects across various fields of study and find inspiration for your next innovation
-//           </p>
-//         </div>
-
-//         {/* Categories Grid */}
-//         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-//           {categories.map((category, index) => (
-//             <Link
-//               href={category.link}
-//               key={category.title}
-//               className="group relative"
-//               onMouseEnter={() => setHoveredIndex(index)}
-//               onMouseLeave={() => setHoveredIndex(null)}
-//             >
-//               <div className={`
-//                 h-full p-8 rounded-2xl transition-all duration-300
-//                 bg-gradient-to-br ${category.color}
-//                 transform ${hoveredIndex === index ? 'scale-105' : 'scale-100'}
-//                 hover:shadow-xl
-//               `}>
-//                 <div className="flex items-start space-x-4">
-//                   <div className="bg-white/20 p-3 rounded-lg">
-//                     <Image
-//                       src={category.icon}
-//                       alt={category.title}
-//                       width={40}
-//                       height={40}
-//                       className="w-10 h-10"
-//                     />
-//                   </div>
-//                   <div className="flex-1">
-//                     <h3 className="text-xl font-bold text-white mb-2">
-//                       {category.title}
-//                     </h3>
-//                     <p className="text-white/90 mb-4">
-//                       {category.description}
-//                     </p>
-//                     <div className="flex items-center justify-between">
-//                       <span className="text-white/80 text-sm">
-//                         {category.count} Projects
-//                       </span>
-//                       <span className="text-white group-hover:translate-x-2 transition-transform duration-300">
-//                         →
-//                       </span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </Link>
-//           ))}
-//         </div>
-
-//         {/* View All Button */}
-//         <div className="text-center mt-16">
-//           <Link
-//             href="/categories"
-//             className="inline-flex items-center space-x-2 bg-white border-2 border-gray-200 text-gray-800 hover:border-gray-300 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg"
-//           >
-//             <span>View All Categories</span>
-//             <span className="text-xl">→</span>
-//           </Link>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default Categories; 
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+type Department = {
+  id: number;
+  name: string;
+  college: {
+    id: number;
+    name: string;
+    university: {
+      id: number;
+      name: string;
+    };
+  };
+};
+
+const chunkArray = (arr: Department[], size: number) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+};
 
 const Categories = () => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
-  const categories = [
-    {
-      title: "علوم الحاسوب",
-      icon: "/images/categories/cs.svg",
-      description:
-        "استكشف مشاريع في الذكاء الاصطناعي، تطوير الويب، تطبيقات الهاتف، والمزيد",
-      count: 234,
-      color: "from-blue-500 to-blue-600",
-      link: "/categories/computer-science",
-    },
-    {
-      title: "الهندسة",
-      icon: "/images/categories/engineering.svg",
-      description: "اكتشف مشاريع في الهندسة الميكانيكية والكهربائية والمدنية",
-      count: 189,
-      color: "from-green-500 to-green-600",
-      link: "/categories/engineering",
-    },
-    {
-      title: "الأعمال",
-      icon: "/images/categories/business.svg",
-      description: "تصفح خطط الأعمال، الشركات الناشئة، وأبحاث السوق",
-      count: 156,
-      color: "from-purple-500 to-purple-600",
-      link: "/categories/business",
-    },
-    {
-      title: "التصميم",
-      icon: "/images/categories/design.svg",
-      description:
-        "اطلع على مشاريع التصميم الجرافيكي، UX/UI، والهندسة المعمارية",
-      count: 142,
-      color: "from-pink-500 to-pink-600",
-      link: "/categories/design",
-    },
-    {
-      title: "العلوم",
-      icon: "/images/categories/science.svg",
-      description: "استكشف أبحاث في الفيزياء والكيمياء والأحياء",
-      count: 167,
-      color: "from-yellow-500 to-yellow-600",
-      link: "/categories/science",
-    },
-    {
-      title: "الفنون والعلوم الإنسانية",
-      icon: "/images/categories/arts.svg",
-      description: "اكتشف مشاريع في الأدب، التاريخ، والفنون البصرية",
-      count: 128,
-      color: "from-red-500 to-red-600",
-      link: "/categories/arts-humanities",
-    },
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/departments");
+        const result = await response.json();
+        setDepartments(result.data);
+      } catch (error) {
+        console.error("فشل في جلب الأقسام:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  const colors = [
+    "from-blue-500 to-blue-600",
+    "from-green-500 to-green-600",
+    "from-purple-500 to-purple-600",
+    "from-pink-500 to-pink-600",
+    "from-yellow-500 to-yellow-600",
+    "from-red-500 to-red-600",
   ];
 
+  const slides = chunkArray(departments, 9);
+
   return (
-    <section className="py-20 bg-gray-50" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 bg-gray-50 relative" dir="rtl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            استعرض الفئات
+            استعرض الأقسام
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            اكتشف المشاريع في مختلف المجالات الأكاديمية واستلهم لفكرتك القادمة
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            تصفح جميع الأقسام الأكاديمية التابعة للكليات والجامعات اليمنية بكل
+            سهولة
           </p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category, index) => (
-            <Link
-              href={category.link}
-              key={category.title}
-              className="group relative"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <div
-                className={`
-                h-full p-8 rounded-2xl transition-all duration-300
-                bg-gradient-to-br ${category.color}
-                transform ${hoveredIndex === index ? "scale-105" : "scale-100"}
-                hover:shadow-xl
-              `}
-              >
-                <div className="flex flex-row-reverse items-start space-x-reverse space-x-4">
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <Image
-                      src={category.icon}
-                      alt={category.title}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10"
-                    />
-                  </div>
-                  <div className="flex-1 text-right">
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {category.title}
-                    </h3>
-                    <p className="text-white/90 mb-4">{category.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/80 text-sm">
-                        {category.count} مشروع
-                      </span>
-                      <span className="text-white group-hover:-translate-x-2 transition-transform duration-300">
-                        ←
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* View All Button */}
-        <div className="text-center mt-16">
-          <Link
-            href="/categories"
-            className="inline-flex items-center space-x-reverse space-x-2 bg-white border-2 border-gray-200 text-gray-800 hover:border-gray-300 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg"
+        {/* Swiper */}
+        <div className="relative">
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            navigation={{
+              nextEl: ".custom-swiper-next",
+              prevEl: ".custom-swiper-prev",
+            }}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            loop
+            className="!pb-12"
           >
-            <span>عرض جميع الفئات</span>
-            <span className="text-xl">←</span>
-          </Link>
+            {slides.map((group, groupIndex) => (
+              <SwiperSlide key={groupIndex}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {group.map((dept, index) => (
+                    <Link
+                      href={`/departments/${dept.id}/projects`}
+                      key={dept.id}
+                      className="block"
+                    >
+                      <div
+                        className={`p-6 rounded-2xl bg-gradient-to-br ${
+                          colors[(groupIndex * 9 + index) % colors.length]
+                        } text-white hover:scale-[1.02] hover:shadow-xl transition duration-300`}
+                      >
+                        <div className="text-right">
+                          <h3 className="text-2xl font-bold mb-2">
+                            {dept.name}
+                          </h3>
+                          <p className="text-white/90 text-md">
+                            <span className="font-semibold">الكلية:</span>{" "}
+                            {dept.college.name}
+                          </p>
+                          <p className="text-white/90 text-md mb-3">
+                            <span className="font-semibold">الجامعة:</span>{" "}
+                            {dept.college.university.name}
+                          </p>
+                          <div className="text-sm text-white/80 font-medium">
+                            عرض المشاريع ←
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          
+          {/* Custom Arrows - with icons */}
+          <div className="custom-swiper-prev hidden md:flex absolute -right-24 top-1/2 -translate-y-1/2 z-10 cursor-pointer">
+            <div className="w-12 h-12 bg-gray-800 text-white text-2xl flex items-center justify-center rounded-full hover:bg-gray-700 shadow-lg">
+              <FiArrowRight />
+            </div>
+          </div>
+
+          <div className="custom-swiper-next hidden md:flex absolute -left-24 top-1/2 -translate-y-1/2 z-10 cursor-pointer">
+            <div className="w-12 h-12 bg-gray-800 text-white text-2xl flex items-center justify-center rounded-full hover:bg-gray-700 shadow-lg">
+              <FiArrowLeft />
+            </div>
+          </div>
         </div>
       </div>
     </section>
