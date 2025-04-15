@@ -1,91 +1,175 @@
 "use client";
 
-import { useState } from "react";
-import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "../context/UserContext"
-const ProfilePage = () => {
-  const [user, setUser] = useState({
-    name: "جون دو",
-    email: "john.doe@example.com",
-    social: {
-      github: "https://github.com/johndoe",
-      linkedin: "https://linkedin.com/in/johndoe",
-      twitter: "https://twitter.com/johndoe",
-    },
-  });
+import { useUser } from "../context/UserContext";
+import toast from "react-hot-toast";
 
-  const [socialForm, setSocialForm] = useState(user.social);
-  const { isLoggedIn, logout, isLoading } = useUser();
-    const router = useRouter();
+const ProfilePage = () => {
+  const router = useRouter();
+  const { logout } = useUser();
+
+  const [user, setUser] = useState<any>(null);
+  const [name, setName] = useState("");
+  const [linkes, setLinkes] = useState("");
+
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
+    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const handleSocialChange = (e: any) => {
-    setSocialForm({ ...socialForm, [e.target.name]: e.target.value });
-  };
+ useEffect(() => {
+   const fetchProfile = async () => {
+     const token = localStorage.getItem("token");
 
-  const handlePasswordChange = (e: any) => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
-  };
-
-  const updateSocialLinks = (e: any) => {
-    e.preventDefault();
-    setUser({ ...user, social: socialForm });
-    alert("تم تحديث روابط التواصل الاجتماعي!");
-  };
-
-  const updatePassword = (e: any) => {
-    e.preventDefault();
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      alert("كلمات المرور الجديدة غير متطابقة!");
-      return;
-    }
-
-    if (!passwordForm.currentPassword) {
-      alert("يرجى إدخال كلمة المرور الحالية.");
-      return;
-    }
-
-    alert("تم تغيير كلمة المرور بنجاح!");
-    setPasswordForm({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-  };
- const handleLogout = async () => {
-   const token = localStorage.getItem("token");
-   if (!token) {
-     logout();
-     router.push("/login");
-     return;
-   }
-
-   try {
-     const response = await fetch("http://127.0.0.1:8000/api/logout", {
-       method: "POST",
-       headers: {
-         Authorization: `Bearer ${token}`,
-         Accept: "application/json",
-         "Content-Type": "application/json",
-       },
-     });
-
-     if (response.ok) {
-       logout();
-       router.push("/login");
-     } else {
-       console.error("Failed to logout:", await response.text());
+     if (!token) {
+       router.push("/403"); // ⛔️ توجيه إلى صفحة ممنوع
+       return;
      }
-   } catch (err) {
-     console.error("Logout error:", err);
-   }
- };
 
+     try {
+       const response = await fetch("http://127.0.0.1:8000/api/profile", {
+         headers: {
+           Authorization: `Bearer ${token}`,
+           Accept: "application/json",
+         },
+       });
+
+       const result = await response.json();
+       if (response.ok && result.data) {
+         setUser(result.data);
+         setName(result.data.name || "");
+
+         if (
+           result.data.role_id === 5 &&
+           result.data.students?.[0]?.socialmedie?.[0]?.linkes
+         ) {
+           setLinkes(result.data.students[0].socialmedie[0].linkes);
+         }
+       } else {
+         toast.error("فشل في تحميل بيانات المستخدم.");
+         router.push("/403"); // ⛔️ توجيه أيضًا لو فشل في جلب البيانات (مثلاً غير مصرح)
+       }
+     } catch (err) {
+       toast.error("حدث خطأ أثناء تحميل الملف الشخصي.");
+       router.push("/403"); // ⛔️ توجيه في حالة أي خطأ
+     }
+   };
+
+   fetchProfile();
+ }, [router]);
+
+
+  const updateProfile = async (e: any) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const body: any = { name };
+
+      if (user.role_id === 5) {
+        body.linkes = linkes;
+      }
+
+      const response = await fetch("http://127.0.0.1:8000/api/profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toast.success("تم تحديث البيانات بنجاح!");
+        setUser(result.data);
+      } else {
+        toast.error(result.message || "فشل في تحديث البيانات.");
+      }
+    } catch (err) {
+      toast.error("حدث خطأ أثناء التحديث.");
+    }
+  };
+
+  const updatePassword = async (e: any) => {
+    e.preventDefault();
+    const { oldPassword, newPassword, confirmPassword } = passwordForm;
+
+    if (newPassword !== confirmPassword) {
+      toast.error("كلمات المرور غير متطابقة.");
+      return;
+    }
+
+    if (newPassword.length < 10) {
+      toast.error("كلمة المرور يجب أن تكون 10 أحرف على الأقل.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://127.0.0.1:8000/api/profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          old_password: oldPassword,
+          password: newPassword,
+          password_confirmation: confirmPassword,
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toast.success("تم تغيير كلمة المرور بنجاح!");
+        setPasswordForm({
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        toast.error(
+          result.message ||
+            result.errors?.password?.[0] ||
+            "فشل في تغيير كلمة المرور."
+        );
+      }
+    } catch (err) {
+      toast.error("حدث خطأ أثناء تغيير كلمة المرور.");
+    }
+  };
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        logout();
+        router.push("/login");
+      } else {
+        toast.error("فشل في تسجيل الخروج.");
+      }
+    } catch (err) {
+      toast.error("خطأ أثناء تسجيل الخروج.");
+    }
+  };
+
+  if (!user)
+    return <div className="text-center mt-20">جاري تحميل البيانات...</div>;
 
   return (
     <div
@@ -97,84 +181,47 @@ const ProfilePage = () => {
           إدارة حسابك الشخصي
         </h1>
 
-        {/* معلومات المستخدم */}
-        <div className="mb-8 border-b pb-6">
-          <p className="text-lg font-semibold text-gray-800 mb-1">
-            👤 {user.name}
-          </p>
-          <p className="text-sm text-gray-500 mb-3">{user.email}</p>
-          <div className="flex space-x-reverse space-x-4 text-2xl text-[#0A2647] justify-start">
-            <a
-              href={user.social.github}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithub />
-            </a>
-            <a
-              href={user.social.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaLinkedin />
-            </a>
-            <a
-              href={user.social.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaTwitter />
-            </a>
-          </div>
-        </div>
-
-        {/* نموذج تعديل روابط التواصل */}
-        <form onSubmit={updateSocialLinks} className="space-y-4 mb-8">
+        <form onSubmit={updateProfile} className="space-y-4 mb-8">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
-            تحديث روابط التواصل الاجتماعي
+            تحديث البيانات العامة
           </h2>
           <input
             type="text"
-            name="github"
-            value={socialForm.github}
-            onChange={handleSocialChange}
-            placeholder="رابط GitHub"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="اسم المستخدم"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
-          <input
-            type="text"
-            name="linkedin"
-            value={socialForm.linkedin}
-            onChange={handleSocialChange}
-            placeholder="رابط LinkedIn"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            name="twitter"
-            value={socialForm.twitter}
-            onChange={handleSocialChange}
-            placeholder="رابط Twitter"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-          />
+
+          {user.role_id === 5 && (
+            <input
+              type="url"
+              value={linkes}
+              onChange={(e) => setLinkes(e.target.value)}
+              placeholder="رابط LinkedIn أو GitHub"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+          )}
+
           <button
             type="submit"
             className="bg-[#0A2647] text-white px-4 py-2 rounded-md hover:bg-blue-900 transition"
           >
-            حفظ الروابط
+            حفظ البيانات
           </button>
         </form>
 
-        {/* نموذج تغيير كلمة المرور */}
         <form onSubmit={updatePassword} className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             تغيير كلمة المرور
           </h2>
           <input
             type="password"
-            name="currentPassword"
-            value={passwordForm.currentPassword}
-            onChange={handlePasswordChange}
+            name="oldPassword"
+            value={passwordForm.oldPassword}
+            onChange={(e) =>
+              setPasswordForm({ ...passwordForm, oldPassword: e.target.value })
+            }
             placeholder="كلمة المرور الحالية"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             required
@@ -183,7 +230,9 @@ const ProfilePage = () => {
             type="password"
             name="newPassword"
             value={passwordForm.newPassword}
-            onChange={handlePasswordChange}
+            onChange={(e) =>
+              setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+            }
             placeholder="كلمة المرور الجديدة"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             required
@@ -192,7 +241,12 @@ const ProfilePage = () => {
             type="password"
             name="confirmPassword"
             value={passwordForm.confirmPassword}
-            onChange={handlePasswordChange}
+            onChange={(e) =>
+              setPasswordForm({
+                ...passwordForm,
+                confirmPassword: e.target.value,
+              })
+            }
             placeholder="تأكيد كلمة المرور الجديدة"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
             required
@@ -204,6 +258,7 @@ const ProfilePage = () => {
             تغيير كلمة المرور
           </button>
         </form>
+
         <div className="text-center mt-6">
           <button
             onClick={handleLogout}

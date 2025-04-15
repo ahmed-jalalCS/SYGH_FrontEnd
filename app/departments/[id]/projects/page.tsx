@@ -28,6 +28,7 @@ const DepartmentProjectsPage = () => {
         setDepartmentName(
           normalizedProjects[0]?.department_name || `القسم رقم ${id}`
         );
+        console.log(normalizedProjects[0]?.department_name);
       } catch (err) {
         setError((err as Error).message);
       } finally {

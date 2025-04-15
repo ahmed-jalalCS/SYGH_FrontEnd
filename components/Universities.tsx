@@ -33,6 +33,7 @@ const chunkArray = (arr: University[], size: number) => {
 
 const Universities = () => {
   const [universities, setUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(true); // ⬅️ حالة التحميل
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -42,6 +43,8 @@ const Universities = () => {
         setUniversities(data);
       } catch (error) {
         console.error("فشل في جلب الجامعات:", error);
+      } finally {
+        setLoading(false); // ⬅️ إيقاف التحميل بعد الجلب
       }
     };
 
@@ -49,6 +52,21 @@ const Universities = () => {
   }, []);
 
   const slides = chunkArray(universities, 9); // 3 صفوف × 3 أعمدة
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-center items-center min-h-screen bg-gray-50"
+        dir="rtl"
+      >
+        <div className="flex space-x-2 rtl:space-x-reverse">
+          <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="py-20 bg-gray-50 relative" dir="rtl">

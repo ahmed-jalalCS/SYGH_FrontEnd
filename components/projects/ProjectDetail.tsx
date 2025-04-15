@@ -1,12 +1,15 @@
   "use client";
 
+import { FaUser } from "react-icons/fa";
+
   import { useState, useEffect } from "react";
-  import { useParams } from "next/navigation";
+  import { useParams, useRouter } from "next/navigation";
   import Image from "next/image";
   import Link from "next/link";
 import SummaryModal from "../SummaryModal";
   const ProjectDetail = () => {
     const { id } = useParams(); // الحصول على معرف المشروع من الرابط
+const router = useRouter();
 
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -138,12 +141,13 @@ const handleSummarize = async () => {
 
     const handleRating = async (rating) => {
       setRatingError(""); // مسح الأخطاء السابقة
-      const token = localStorage.getItem("token");
+       const token =
+         typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-      if (!token) {
-        setRatingError("التسجيل مطلوب. الرجاء تسجيل الدخول.");
-        return;
-      }
+       if (!token) {
+         router.push("/login");
+         return;
+       }
 
       try {
         const response = await fetch(
@@ -167,55 +171,67 @@ const handleSummarize = async () => {
       }
     };
 
-    const handleSubmitComment = async () => {
-      setCommentError(""); // مسح الأخطاء السابقة
-      const token = localStorage.getItem("token");
+   const handleSubmitComment = async () => {
+     setCommentError("");
+     
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-      if (!token) {
-        setCommentError("التسجيل مطلوب. الرجاء تسجيل الدخول.");
-        return;
-      }
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-      if (!newComment.trim()) {
-        setCommentError("لا يمكن أن يكون التعليق فارغًا.");
-        return;
-      }
+    if (!newComment.trim()) {
+      setCommentError("لا يمكن أن يكون التعليق فارغًا.");
+      return;
+    }
 
-      setSubmitting(true);
+     if (!newComment.trim()) {
+       setCommentError("لا يمكن أن يكون التعليق فارغًا.");
+       return;
+     }
 
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/project/${id}/comment`,
+     setSubmitting(true);
+
+     try {
+       const response = await fetch(
+         `http://127.0.0.1:8000/api/project/${id}/comment`,
+         {
+           method: "POST",
+           headers: {
+             "Content-Type": "application/json",
+             Authorization: `Bearer ${token}`,
+           },
+           body: JSON.stringify({ body: newComment }),
+         }
+       );
+
+       if (!response.ok) throw new Error("فشل في إرسال التعليق");
+
+       const data = await response.json();
+
+      setProject((prev) => ({
+        ...prev,
+        comments: [
+          ...prev.comments,
           {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ body: newComment }), // إرسال نص التعليق
-          }
-        );
+            id: data.id, // ✅ استخدم id الحقيقي الراجع من السيرفر
+            body: newComment,
+            user_name: loggedInUser, // أو data.user_name إذا متوفر
+          },
+        ],
+      }));
 
-        if (!response.ok) throw new Error("فشل في إرسال التعليق");
 
-        const data = await response.json();
+       setNewComment("");
+     } catch (error) {
+       setCommentError(error.message);
+     } finally {
+       setSubmitting(false);
+     }
+   };
 
-        // تحديث قائمة التعليقات ديناميكيًا
-        setProject((prevProject) => ({
-          ...prevProject,
-          comments: [
-            ...prevProject.comments,
-            { id: Date.now(), body: newComment, user_name: "أنت" },
-          ],
-        }));
-
-        setNewComment(""); // تفريغ الحقل
-      } catch (error) {
-        setCommentError(error.message);
-      } finally {
-        setSubmitting(false);
-      }
-    };
     const handleEditComment = async (commentId) => {
       setCommentError(""); // مسح الأخطاء
 
@@ -329,13 +345,8 @@ const handleSummarize = async () => {
             <div className="lg:col-span-2">
               <div className="flex justify-start mb-6" dir="rtl">
                 {" "}
-                
-                <button
-                  
-                  onClick={() => alert("سيتم عرض  المشروع هنا قريبًا")}
-                  className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
-                >
-                  📝 عرض المشروع
+                <button className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                  <Link href={project.document_path}>📝 عرض المشروع</Link>
                 </button>
               </div>
               {/* زر ملخص المشروع */}
@@ -364,7 +375,7 @@ const handleSummarize = async () => {
               <p className="text-gray-600 mb-6">{project.supervisorName}</p>
 
               {/* الوثائق */}
-              {project.document_path && (
+              {/* {project.document_path && (
                 <div className="mt-6">
                   <a
                     href={project.document_path}
@@ -375,7 +386,7 @@ const handleSummarize = async () => {
                     <span>📄 عرض توثيق المشروع</span>
                   </a>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* العمود الأيمن - التقييم والطلاب */}
@@ -512,48 +523,52 @@ const handleSummarize = async () => {
                   className="border-b last:border-0 pb-4 mb-4"
                 >
                   {editingCommentId === comment.id ? (
-                    <div className="flex items-center space-x-2">
+                    <div className="mt-2" dir="rtl">
                       <textarea
                         className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={editedComment}
                         onChange={(e) => setEditedComment(e.target.value)}
                         rows={2}
                       ></textarea>
-                      <button
-                        onClick={() => handleEditComment(comment.id)}
-                        className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition"
-                      >
-                        حفظ
-                      </button>
-                      <button
-                        onClick={() => setEditingCommentId(null)}
-                        className="bg-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-400 transition"
-                      >
-                        إلغاء
-                      </button>
+
+                      <div className="flex flex-row-reverse justify-start gap-2 mt-2">
+                        <button
+                          onClick={() => handleEditComment(comment.id)}
+                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                        >
+                          حفظ
+                        </button>
+                        <button
+                          onClick={() => setEditingCommentId(null)}
+                          className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+                        >
+                          إلغاء
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>
                       <p className="text-gray-600 italic">"{comment.body}"</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        - {comment.user_name}
+                      <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                        <FaUser className="text-blue-500" />
+                        {comment.user_name}
                       </p>
 
                       {loggedInUser === comment.user_name && (
-                        <div className="flex space-x-2 mt-2">
+                        <div className="flex space-x-2 rtl:space-x-reverse mt-2">
                           <button
                             onClick={() => {
                               setEditingCommentId(comment.id);
                               setEditedComment(comment.body);
                             }}
-                            className="text-blue-500 hover:underline"
+                            className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition"
                           >
                             تعديل
                           </button>
 
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
-                            className="text-red-500 hover:underline"
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
                           >
                             {deletingCommentId === comment.id
                               ? "جاري الحذف..."

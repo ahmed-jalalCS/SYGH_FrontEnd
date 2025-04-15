@@ -21,7 +21,8 @@ export const UserProvider = ({ children }: any) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("token"); // ✅ احذف التوكن
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");// ✅ احذف التوكن
     setIsLoggedIn(false);
   };
 

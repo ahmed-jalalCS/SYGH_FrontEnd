@@ -1,8 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import CryptoJS from "crypto-js";
+import toast from "react-hot-toast";
+
+const secretKey = "my_secret_key_123";
 
 const UploadProjectForm = () => {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+
   const [formData, setFormData] = useState({
     description: "",
     videoUrl: "",
@@ -12,8 +20,34 @@ const UploadProjectForm = () => {
   const [status, setStatus] = useState({
     loading: false,
     message: "",
-    success: null,
+    success: null as boolean | null,
   });
+
+  // ✅ فك تشفير بيانات المستخدم
+  const getDecryptedUser = () => {
+    try {
+      const encryptedUser = localStorage.getItem("user");
+      if (!encryptedUser) return null;
+      const bytes = CryptoJS.AES.decrypt(encryptedUser, secretKey);
+      const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+      return JSON.parse(decryptedData);
+    } catch (error) {
+      console.error("فشل فك التشفير:", error);
+      return null;
+    }
+  };
+
+  // ✅ التحقق من الصلاحية
+  useEffect(() => {
+    const user = getDecryptedUser();
+
+    if (user?.role_id === 5 && user.students?.[0]?.isTemLeder === 1) {
+      setAuthorized(true); // ✅ السماح بالوصول
+    } else {
+      toast.error("ليس لديك صلاحية للوصول إلى هذه الصفحة.");
+      router.push("/403"); // ❌ منع غير المصرح لهم
+    }
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,7 +82,7 @@ const UploadProjectForm = () => {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/project/uploade", // ✅ المسار المحدث
+        "http://127.0.0.1:8000/api/project/uploade",
         {
           method: "POST",
           headers: {
@@ -64,7 +98,6 @@ const UploadProjectForm = () => {
 
       setStatus({ loading: false, message: result.message, success: true });
 
-      // ✅ إظهار رابط المستند بعد نجاح الرفع (اختياري)
       if (result.project?.document?.pathDo) {
         window.open(result.project.document.pathDo, "_blank");
       }
@@ -73,6 +106,9 @@ const UploadProjectForm = () => {
     }
   };
 
+  // ✅ لا تعرض النموذج إذا لم يتم التحقق من الصلاحية بعد
+  if (!authorized) return null;
+
   return (
     <div
       className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
@@ -80,7 +116,7 @@ const UploadProjectForm = () => {
     >
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-8 text-right">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          تحديث معلومات المشروع
+          رفع المشروع
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -138,9 +174,9 @@ const UploadProjectForm = () => {
 
           {status.message && (
             <p
-              className={`text-sm mt-2 ${
+              className={`text-sm mt-2 text-center ${
                 status.success ? "text-green-600" : "text-red-500"
-              } text-center`}
+              }`}
             >
               {status.message}
             </p>

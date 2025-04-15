@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { FaRegCaretSquareLeft } from "react-icons/fa";
 
 const CollegeDepartments = () => {
   const { id } = useParams();
@@ -23,14 +24,15 @@ const CollegeDepartments = () => {
 
          const result = await response.json();
          setDepartments(result.data || []);
-
+         setCollegeName(result.college_name);
+         console.log(result.college_name)
          // استخراج اسم الكلية من أول قسم
-         const firstDepartment = result.data?.[0];
-         if (firstDepartment && firstDepartment.college) {
-           setCollegeName(firstDepartment.college.name);
-         } else {
-           setCollegeName(`الكلية رقم ${id}`);
-         }
+        //  const firstDepartment = result.data?.[0];
+        //  if (firstDepartment && firstDepartment.result.college_name) {
+        //    setCollegeName(response.college_name);
+        //  } else {
+        //    setCollegeName(`الكلية رقم ${collegeName}`);
+        //  }
        } catch (err) {
          console.error(err);
          setError("تعذر تحميل الأقسام.");
