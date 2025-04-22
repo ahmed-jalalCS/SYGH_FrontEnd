@@ -33,7 +33,7 @@ const chunkArray = (arr: University[], size: number) => {
 
 const Universities = () => {
   const [universities, setUniversities] = useState<University[]>([]);
-  const [loading, setLoading] = useState(true); // ⬅️ حالة التحميل
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -44,14 +44,14 @@ const Universities = () => {
       } catch (error) {
         console.error("فشل في جلب الجامعات:", error);
       } finally {
-        setLoading(false); // ⬅️ إيقاف التحميل بعد الجلب
+        setLoading(false);
       }
     };
 
     fetchUniversities();
   }, []);
 
-  const slides = chunkArray(universities, 9); // 3 صفوف × 3 أعمدة
+  const slides = chunkArray(universities, 9);
 
   if (loading) {
     return (
@@ -103,7 +103,7 @@ const Universities = () => {
                       {university.image && (
                         <div className="relative h-40 w-full mb-4 rounded-lg overflow-hidden">
                           <Image
-                            src={university.image}
+                            src={`http://127.0.0.1:8000/storage/${university.image}`}
                             alt={university.name}
                             fill
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
